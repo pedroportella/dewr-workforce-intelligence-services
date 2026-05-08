@@ -1,0 +1,29 @@
+{
+  "name": "dewr-workforce-intelligence-services",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "DEWR workforce intelligence REST API prototype with SQL Server-style persistence models",
+  "packageManager": "pnpm@8.15.5",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "seed": "tsx src/seed.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx src/workforce.contract.test.ts",
+    "schema": "echo SQL Server persistence contract is documented in prisma/schema.prisma"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
+  }
+}

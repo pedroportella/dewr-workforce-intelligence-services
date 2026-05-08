@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlserver"
+}
+
+model WorkforceRegion {
+  regionId        String                    @id
+  displayName     String
+  state           String
+  primaryIndustry String
+  cohort          String
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  snapshots       WorkforceMetricSnapshot[]
+  events          WorkforceEventInbox[]
+}
+
+model WorkforceMetricSnapshot {
+  snapshotId                  String          @id @default(uuid())
+  regionId                    String
+  region                      WorkforceRegion @relation(fields: [regionId], references: [regionId])
+  employmentRatePercent       Float
+  vacancies                   Int
+  skillsGapIndex              Int
+  trainingCompletions         Int
+  sustainedOutcomeRatePercent Float
+  participantCount            Int
+  observedAt                  DateTime
+  createdAt                   DateTime        @default(now())
+
+  @@index([regionId, observedAt])
+}
+
+model WorkforceEventInbox {
+  eventId     String          @id
+  eventType   String
+  regionId    String
+  region      WorkforceRegion @relation(fields: [regionId], references: [regionId])
+  occurredAt  DateTime
+  payloadJson String          @db.NVarChar(Max)
+  processedAt DateTime?
+  createdAt   DateTime        @default(now())
+
+  @@index([eventType, occurredAt])
+}
+
+model PathwayScenario {
+  scenarioId     String @id
+  displayName    String
+  summary        String @db.NVarChar(2000)
+  horizonQuarter String
+}
