@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <ProjectReference Include="..\TrackingDemo.Domain\TrackingDemo.Domain.csproj" />
-  </ItemGroup>
-  <PropertyGroup>
-    <RootNamespace>TrackingDemo.Application</RootNamespace>
-  </PropertyGroup>
-</Project>

@@ -13,6 +13,8 @@
   "include": [
     "src/app.ts",
     "src/server.ts",
+    "src/db.ts",
+    "src/seed.ts",
     "src/workforce.contract.test.ts",
     "src/modules/workforce/**/*.ts"
   ]

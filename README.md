@@ -1,6 +1,6 @@
 # DEWR Workforce Intelligence Services
 
-REST API prototype refactored from the tracking services base into a workforce intelligence backend.
+REST API prototype for DEWR workforce intelligence.
 
 ## Endpoints
 
@@ -12,13 +12,21 @@ REST API prototype refactored from the tracking services base into a workforce i
 ## Architecture
 
 The service uses controller/routes, application service and repository boundaries that mirror a .NET
-Web API architecture. The repository is in-memory for prototype speed, while `prisma/schema.prisma`
-and `docs/SQL-SERVER-PERSISTENCE.md` define SQL Server-style persistence models.
+Web API architecture. The runtime repository is in-memory for prototype speed, while Prisma keeps
+the SQL Server persistence contract concrete through:
+
+- `prisma/schema.prisma`
+- `prisma/migrations/20260508000000_init_workforce_intelligence/migration.sql`
+- `src/db.ts`
+- `src/seed.ts`
 
 ## Run
 
 ```bash
 pnpm install
+pnpm prisma:generate
 pnpm start
 pnpm test
 ```
+
+Use `pnpm prisma:migrate` and `pnpm seed` when a SQL Server `DATABASE_URL` is available.

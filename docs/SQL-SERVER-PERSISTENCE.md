@@ -1,7 +1,8 @@
 # SQL Server-style persistence model
 
 The prototype service keeps an in-memory repository for local delivery speed, but the application
-shape follows a Web API and SQL Server persistence boundary.
+shape follows a Web API and SQL Server persistence boundary. Prisma files are retained so the schema
+can be generated, migrated and seeded against SQL Server when a `DATABASE_URL` is available.
 
 ## Tables
 
@@ -20,3 +21,9 @@ shape follows a Web API and SQL Server persistence boundary.
 
 The repository can be replaced by an EF Core or Prisma SQL Server adapter without changing the
 controller route contracts.
+
+## Prisma workflow
+
+- `pnpm prisma:generate` generates the Prisma client from `prisma/schema.prisma`.
+- `pnpm prisma:migrate` applies `prisma/migrations` to SQL Server.
+- `pnpm seed` loads representative DEWR scenario, region and metric snapshot data.

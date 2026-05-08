@@ -1,10 +1,10 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "sqlserver"
+  url      = env("DATABASE_URL")
 }
 
 model WorkforceRegion {
@@ -17,6 +17,8 @@ model WorkforceRegion {
   updatedAt       DateTime                  @updatedAt
   snapshots       WorkforceMetricSnapshot[]
   events          WorkforceEventInbox[]
+
+  @@map("WorkforceRegion")
 }
 
 model WorkforceMetricSnapshot {
@@ -33,6 +35,7 @@ model WorkforceMetricSnapshot {
   createdAt                   DateTime        @default(now())
 
   @@index([regionId, observedAt])
+  @@map("WorkforceMetricSnapshot")
 }
 
 model WorkforceEventInbox {
@@ -46,6 +49,7 @@ model WorkforceEventInbox {
   createdAt   DateTime        @default(now())
 
   @@index([eventType, occurredAt])
+  @@map("WorkforceEventInbox")
 }
 
 model PathwayScenario {
@@ -53,4 +57,6 @@ model PathwayScenario {
   displayName    String
   summary        String @db.NVarChar(2000)
   horizonQuarter String
+
+  @@map("PathwayScenario")
 }
