@@ -2,27 +2,48 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
+  workflow_dispatch: {}
 
 jobs:
-  build-test:
+  build:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
         with:
-          dotnet-version: 8.0.x
+          node-version: '24'
+          package-manager-cache: false
 
-      - name: Restore
-        run: dotnet restore TrackingDemo.Services.sln
+      - name: Verify runtime
+        run: |
+          node --version
+          npm --version
 
-      - name: Build
-        run: dotnet build TrackingDemo.Services.sln --configuration Release --no-restore
+      - name: Setup pnpm via Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+          pnpm --version
 
-      - name: Test
-        run: dotnet test TrackingDemo.Services.sln --configuration Release --no-build
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm prisma:generate
+
+      - name: Run type-check
+        run: pnpm typecheck
+
+      - name: Run tests
+        run: pnpm test
