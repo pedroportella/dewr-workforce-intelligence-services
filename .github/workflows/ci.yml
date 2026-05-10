@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: '24'
+          node-version: '20.19.0'
           package-manager-cache: false
 
       - name: Verify runtime
@@ -33,7 +33,7 @@ jobs:
       - name: Setup pnpm via Corepack
         run: |
           corepack enable
-          corepack prepare pnpm@latest --activate
+          corepack prepare pnpm@8.15.5 --activate
           pnpm --version
 
       - name: Install dependencies
@@ -47,3 +47,9 @@ jobs:
 
       - name: Run tests
         run: pnpm test
+
+      - name: Build application
+        run: pnpm build
+
+      - name: Build Docker image
+        run: docker build -t dewr-workforce-intelligence-services:ci .

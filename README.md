@@ -24,8 +24,8 @@ the SQL Server persistence contract concrete through:
 
 ### Prerequisites
 
-- **Node.js 24+** — Runtime environment
-- **pnpm 9+** — Package manager (managed via Corepack)
+- **Node.js 20.19+** — Runtime environment
+- **pnpm 8.15.5** — Package manager (managed via Corepack)
 - **SQL Server** (optional) — Required only for full database persistence testing
 
 ### Installation
@@ -99,11 +99,13 @@ The project uses GitHub Actions for continuous integration. The workflow runs on
 **Steps:**
 1. **Checkout** — Clone repository
 2. **Setup Node.js 24** — Configure runtime environment
-3. **Setup pnpm** — Enable Corepack and install pnpm
+3. **Setup pnpm** — Enable Corepack and install pnpm 8.15.5
 4. **Install dependencies** — Run `pnpm install --frozen-lockfile`
 5. **Generate Prisma client** — Run `pnpm prisma:generate`
 6. **Type check** — Run `pnpm typecheck` (validates TypeScript without emitting)
 7. **Test** — Run `pnpm test` (contract tests)
+8. **Build** — Run `pnpm build`
+9. **Docker image** — Build `dewr-workforce-intelligence-services:ci`
 
 All steps must pass for the workflow to succeed. Failed type checks or test failures will block PR merges.
 
@@ -112,6 +114,7 @@ All steps must pass for the workflow to succeed. Failed type checks or test fail
 | Script | Description |
 |--------|-------------|
 | `dev` | Start development server with hot reload (`tsx watch`) |
+| `build` | Compile TypeScript into `dist` |
 | `start` | Start the application in production mode |
 | `test` | Run contract tests that validate service boundaries |
 | `typecheck` | TypeScript type checking without emitting files |
@@ -154,3 +157,10 @@ pnpm typecheck
 - Ensure SQL Server instance is running and accessible
 - Check that the database user has appropriate permissions
 - Run migrations: `pnpm prisma:migrate`
+
+## Docker
+
+```bash
+docker build -t dewr-workforce-intelligence-services:local .
+docker run --rm -p 4000:4000 dewr-workforce-intelligence-services:local
+```
