@@ -1,162 +1,52 @@
 # DEWR Workforce Intelligence Services
 
-REST API prototype for DEWR workforce intelligence.
+REST API prototype for DEWR workforce intelligence, regional pathway metrics and event ingestion.
+
+## What it demonstrates
+
+- Express REST API shaped around controller, route, service and repository boundaries.
+- SQL Server persistence contract represented with Prisma schema and migrations.
+- In-memory runtime repository for fast local review without a database dependency.
+- Contract tests for the workforce dataset and event ingestion boundary.
+- Docker and CI evidence for repeatable delivery.
 
 ## Architecture
 
-The service uses controller/routes, application service and repository boundaries that mirror a .NET
-Web API architecture. The runtime repository is in-memory for prototype speed, while Prisma keeps
-the SQL Server persistence contract concrete through:
+The service mirrors a .NET Web API style boundary:
 
-- `prisma/schema.prisma`
-- `prisma/migrations/20260508000000_init_workforce_intelligence/migration.sql`
-- `src/db.ts`
-- `src/seed.ts`
+- `src/server.ts`: application entrypoint.
+- `src/app.ts`: Express app, middleware and route registration.
+- `src/modules/workforce`: workforce routes, service, repository and DTO types.
+- `prisma/schema.prisma`: SQL Server persistence model.
+- `prisma/migrations/20260508000000_init_workforce_intelligence/migration.sql`: database migration.
+- `src/db.ts` and `src/seed.ts`: Prisma client and seed workflow.
 
-## Endpoints
+## Prerequisites
 
-- `GET /health` — Service health check
-- `GET /api/v1/workforce-intelligence/pathways/dataset` — Retrieve workforce pathways dataset
-- `GET /api/v1/workforce-intelligence/events` — List events
-- `POST /api/v1/workforce-intelligence/events` — Ingest workforce events
+- Node.js 20.19+
+- pnpm 8.15.5, managed via Corepack
+- Docker, for container review
+- SQL Server, optional and only required for persistence testing
 
-## Local Setup
-
-### Prerequisites
-
-- **Node.js 20.19+** — Runtime environment
-- **pnpm 8.15.5** — Package manager (managed via Corepack)
-- **SQL Server** (optional) — Required only for full database persistence testing
-
-### Installation
+## Local setup
 
 ```bash
-# Install dependencies using pnpm
 pnpm install
-
-# Generate Prisma client
 pnpm prisma:generate
-```
-
-### Running Locally
-
-**In-memory mode (no database required):**
-
-```bash
-# Start the development server
 pnpm dev
+```
 
-# Run contract tests (validates service logic)
+The service runs at `http://localhost:4000`.
+
+Useful local checks:
+
+```bash
 pnpm test
-
-# Type check
 pnpm typecheck
+pnpm build
 ```
 
-The in-memory repository means you can run the full service and test suite without a database connection. The `DATABASE_URL` environment variable is optional for this mode.
-
-**With SQL Server persistence:**
-
-If you have a SQL Server instance running, configure the connection string:
-
-```bash
-# Update .env with your SQL Server connection
-DATABASE_URL="sqlserver://localhost:1433;database=your_db;user=sa;password=Your_strong_Passw0rd!;encrypt=true;trustServerCertificate=true"
-
-# Generate migrations and seed data
-pnpm prisma:migrate
-pnpm seed
-
-# View the database schema in Prisma Studio
-pnpm prisma:studio
-```
-
-## Database
-
-### Schema & Migrations
-
-- **Provider:** SQL Server
-- **Schema:** [prisma/schema.prisma](prisma/schema.prisma)
-- **Migration:** [prisma/migrations/20260508000000_init_workforce_intelligence/migration.sql](prisma/migrations/20260508000000_init_workforce_intelligence/migration.sql)
-
-### Tables
-
-- `WorkforceRegion` — Regional workforce data (SA4 level)
-- `WorkforceMetricSnapshot` — Point-in-time metric observations
-- `WorkforceEventInbox` — Ingested workforce events
-
-## CI/CD Pipeline
-
-The project uses GitHub Actions for continuous integration. The workflow runs on every push to `main` and on all pull requests.
-
-### Workflow: `ci.yml`
-
-**Triggers:**
-- Push to `main` branch
-- Pull requests to `main` branch  
-- Manual trigger via `workflow_dispatch`
-
-**Steps:**
-1. **Checkout** — Clone repository
-2. **Setup Node.js 24** — Configure runtime environment
-3. **Setup pnpm** — Enable Corepack and install pnpm 8.15.5
-4. **Install dependencies** — Run `pnpm install --frozen-lockfile`
-5. **Generate Prisma client** — Run `pnpm prisma:generate`
-6. **Type check** — Run `pnpm typecheck` (validates TypeScript without emitting)
-7. **Test** — Run `pnpm test` (contract tests)
-8. **Build** — Run `pnpm build`
-9. **Docker image** — Build `dewr-workforce-intelligence-services:ci`
-
-All steps must pass for the workflow to succeed. Failed type checks or test failures will block PR merges.
-
-## npm Scripts
-
-| Script | Description |
-|--------|-------------|
-| `dev` | Start development server with hot reload (`tsx watch`) |
-| `build` | Compile TypeScript into `dist` |
-| `start` | Start the application in production mode |
-| `test` | Run contract tests that validate service boundaries |
-| `typecheck` | TypeScript type checking without emitting files |
-| `prisma:generate` | Generate Prisma client from schema |
-| `prisma:migrate` | Run pending migrations (requires SQL Server) |
-| `seed` | Populate database with sample data (requires SQL Server) |
-| `prisma:studio` | Open Prisma Studio to browse data (requires SQL Server) |
-
-## Troubleshooting
-
-### Prisma Client Generation Fails
-
-Ensure you have the latest schema:
-
-```bash
-pnpm prisma:generate
-```
-
-### Tests Fail Locally but Pass in CI
-
-The tests use in-memory state. Ensure you're starting fresh:
-
-```bash
-# Restart the process to clear in-memory state
-pnpm test
-```
-
-### Type Errors in IDE
-
-Regenerate the Prisma client and run type check:
-
-```bash
-pnpm prisma:generate
-pnpm typecheck
-```
-
-### Database Connection Issues (with SQL Server)
-
-- Verify `DATABASE_URL` in `.env` is correct
-- Ensure SQL Server instance is running and accessible
-- Check that the database user has appropriate permissions
-- Run migrations: `pnpm prisma:migrate`
+The default runtime is in-memory, so `DATABASE_URL` is not required for local service review or tests.
 
 ## Docker
 
@@ -164,3 +54,61 @@ pnpm typecheck
 docker build -t dewr-workforce-intelligence-services:local .
 docker run --rm -p 4000:4000 dewr-workforce-intelligence-services:local
 ```
+
+Container URL: `http://localhost:4000`.
+
+## Endpoints
+
+- `GET /health`: service health check.
+- `GET /api/v1/workforce-intelligence/pathways/dataset`: retrieve workforce pathways dataset.
+- `GET /api/v1/workforce-intelligence/events`: list recent events.
+- `POST /api/v1/workforce-intelligence/events`: ingest workforce events.
+
+## Configuration
+
+For SQL Server persistence testing, create `.env` with:
+
+```bash
+DATABASE_URL="sqlserver://localhost:1433;database=your_db;user=sa;password=Your_strong_Passw0rd!;encrypt=true;trustServerCertificate=true"
+```
+
+Then run:
+
+```bash
+pnpm prisma:migrate
+pnpm seed
+pnpm prisma:studio
+```
+
+## CI / GitHub Actions
+
+`.github/workflows/ci.yml` runs on pushes to `main`, pull requests to `main`, and manual dispatch.
+
+The workflow uses Node.js 20.19.0 and Corepack-managed `pnpm@8.15.5`, then runs:
+
+- `pnpm install --frozen-lockfile`
+- `pnpm prisma:generate`
+- `pnpm typecheck`
+- `pnpm test`
+- `pnpm build`
+- Docker image build as `dewr-workforce-intelligence-services:ci`
+
+## npm scripts
+
+| Script | Description |
+| --- | --- |
+| `dev` | Start development server with hot reload |
+| `build` | Compile TypeScript into `dist` |
+| `start` | Start the compiled production server |
+| `test` | Run service contract tests |
+| `typecheck` | Type-check without emitting files |
+| `prisma:generate` | Generate Prisma client |
+| `prisma:migrate` | Run migrations against SQL Server |
+| `seed` | Seed SQL Server sample data |
+| `prisma:studio` | Open Prisma Studio |
+
+## Troubleshooting
+
+- Regenerate Prisma client with `pnpm prisma:generate` if IDE types look stale.
+- Restart the service to clear in-memory state during manual testing.
+- For SQL Server issues, verify `DATABASE_URL`, database access and migrations.
